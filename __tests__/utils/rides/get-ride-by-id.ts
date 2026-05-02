@@ -10,10 +10,10 @@ export const getRideById = async (
   rideId: string,
   expectedStatus?: HttpStatus,
 ): Promise<WrappedDriverOutputDTO> => {
-  const testStatus = expectedStatus ?? HttpStatus.Ok;
+  const testStatus = expectedStatus ?? HttpStatus.Ok_200;
 
   const getRideResponse = await request(app)
-    .get(`${SETTINGS.RIDES_PATH}/${rideId}`)
+    .get(`${SETTINGS.POSTS_PATH}/${rideId}`)
     .set('Authorization', generateBasicAuthToken())
     .expect(testStatus);
 

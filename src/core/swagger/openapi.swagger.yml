@@ -7,7 +7,7 @@ info:
 tags:
   - name: Testing
     description: API for clearing the database
-  - name: Drivers
-    description: API for managing drivers
-  - name: Rides
-    description: API for managing rides
+  - name: Blogs
+    description: API for managing blogs
+  - name: Posts
+    description: API for managing posts

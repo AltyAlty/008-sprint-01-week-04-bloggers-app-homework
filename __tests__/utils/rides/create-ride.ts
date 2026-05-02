@@ -18,16 +18,16 @@ export const createRide = async (
 
   const testRideData = {
     data: {
-      type: ResourceType.Rides,
+      type: ResourceType.Posts,
       attributes: { ...defaultRideData, ...rideDTO },
     },
   };
 
   const createRideResponse = await request(app)
-    .post(SETTINGS.RIDES_PATH)
+    .post(SETTINGS.POSTS_PATH)
     .set('Authorization', generateBasicAuthToken())
     .send(testRideData)
-    .expect(HttpStatus.Created);
+    .expect(HttpStatus.Created_201);
 
   return createRideResponse.body;
 };

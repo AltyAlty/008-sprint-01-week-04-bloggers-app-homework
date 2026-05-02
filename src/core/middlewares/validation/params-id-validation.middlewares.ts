@@ -1,31 +1,32 @@
 /*Импортируем метод "param()" из библиотеки express-validator, чтобы проверять ID.*/
-import { body, param } from 'express-validator';
+import { param } from 'express-validator';
 
-/*Middleware "idValidation" проверяет, что ID:
+/*Middleware "idValidation" проверяет, что поле "id":
 1. Существует в запросе.
 2. Является строкой.
 3. Не является пустым.
 4. Является типа ObjectId.*/
 export const idValidation = param('id')
   .exists()
-  .withMessage('ID is required')
+  .withMessage('id is required')
   .isString()
-  .withMessage('ID must be a string')
+  .withMessage('id must be a string')
   .isLength({ min: 1 })
-  .withMessage('ID must not be empty')
+  .withMessage('id must not be empty')
   .isMongoId()
   .withMessage('Incorrect format of ObjectId');
 
-/*Middleware "dataIdMatchValidation" при обработке запроса на изменение сущности проверяет, что:
-1. В теле запроса есть ID.
-2. ID в теле запроса совпадает с ID из URI-параметров.*/
-export const dataIdMatchValidation = body('data.id')
+/*Middleware "blogIdValidation" проверяет, что поле "blogId":
+1. Существует в запросе.
+2. Является строкой.
+3. Не является пустым.
+4. Является типа ObjectId.*/
+export const blogIdValidation = param('blogId')
   .exists()
-  .withMessage('ID in body is required')
-  /*Библиотека express-validator сделает так, что параметр "value" будет равен тому, что находится в свойстве
-  "data.id".*/
-  .custom((value, { req }) => {
-    if (value !== req?.params?.id) throw new Error('ID in URL and ID in body must match');
-    /*Если валидация прошла успешно, то возвращаем true.*/
-    return true;
-  });
+  .withMessage('blogId is required')
+  .isString()
+  .withMessage('blogId must be a string')
+  .isLength({ min: 1 })
+  .withMessage('blogId must not be empty')
+  .isMongoId()
+  .withMessage('Incorrect format of ObjectId');

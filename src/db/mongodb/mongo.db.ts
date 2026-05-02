@@ -1,11 +1,11 @@
 import { Collection, Db, MongoClient } from 'mongodb';
 import { SETTINGS } from '../../core/settings/settings';
-import { DriverType } from '../../drivers/types/driver.type';
-import { RideType } from '../../rides/types/ride.type';
+import { BlogType } from '../../blogs/types/blog.type';
+import { PostType } from '../../posts/types/post.type';
 
 export let client: MongoClient;
-export let driversCollection: Collection<DriverType>;
-export let ridesCollection: Collection<RideType>;
+export let blogsCollection: Collection<BlogType>;
+export let postsCollection: Collection<PostType>;
 
 /*Функция "runDB()" для подключения к серверу MongoDB.*/
 export const runDB = async (url: string, dbName: string): Promise<void> => {
@@ -14,8 +14,8 @@ export const runDB = async (url: string, dbName: string): Promise<void> => {
   /*Указываем БД, к которой будет подключаться клиент для MongoDB.*/
   const db: Db = client.db(dbName);
   /*Создаем коллекции в указанной БД.*/
-  driversCollection = db.collection<DriverType>(SETTINGS.DRIVERS_COLLECTION_NAME);
-  ridesCollection = db.collection<RideType>(SETTINGS.RIDES_COLLECTION_NAME);
+  blogsCollection = db.collection<BlogType>(SETTINGS.BLOGS_COLLECTION_NAME);
+  postsCollection = db.collection<PostType>(SETTINGS.POSTS_COLLECTION_NAME);
 
   try {
     /*Присоединяем клиента для MongoDB к серверу и проверяем соединение.*/

@@ -17,17 +17,17 @@ export const createDriver = async (
   /*Получаем DTO с корректными данными для создания водителя для целей тестирования.*/
   const testDriverData: CreateDriverDataInputDTO = {
     data: {
-      type: ResourceType.Drivers,
+      type: ResourceType.Blogs,
       attributes: { ...getCreateDriverInputDTO(), ...driverDTO },
     },
   };
 
   /*Создаем водителя.*/
   const createDriverResponse = await request(app)
-    .post(SETTINGS.DRIVERS_PATH)
+    .post(SETTINGS.BLOGS_PATH)
     .set('Authorization', generateBasicAuthToken())
     .send(testDriverData)
-    .expect(HttpStatus.Created);
+    .expect(HttpStatus.Created_201);
 
   /*Возвращаем тело ответа.*/
   return createDriverResponse.body;

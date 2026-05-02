@@ -17,7 +17,7 @@ export const updateDriverById = async (
   /*Получаем DTO с корректными данными для изменения водителя для целей тестирования.*/
   const testDriverData: UpdateDriverDataInputDTO = {
     data: {
-      type: ResourceType.Drivers,
+      type: ResourceType.Blogs,
       id: driverId,
       attributes: { ...getUpdateDriverInputDTO(), ...driverDTO },
     },
@@ -25,10 +25,10 @@ export const updateDriverById = async (
 
   /*Изменяем водителя.*/
   const updateDriverResponse = await request(app)
-    .put(`${SETTINGS.DRIVERS_PATH}/${driverId}`)
+    .put(`${SETTINGS.BLOGS_PATH}/${driverId}`)
     .set('Authorization', generateBasicAuthToken())
     .send(testDriverData)
-    .expect(HttpStatus.NoContent);
+    .expect(HttpStatus.NoContent_204);
 
   /*Возвращаем тело ответа.*/
   return updateDriverResponse.body;

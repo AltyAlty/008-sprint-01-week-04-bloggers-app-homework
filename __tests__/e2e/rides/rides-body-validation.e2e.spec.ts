@@ -24,14 +24,14 @@ describe('Rides API body validation check', () => {
   afterAll(async () => await stopDb());
 
   it(`❌ should not create a ride when incorrect body passed; POST /api/rides'`, async () => {
-    await request(app).post(SETTINGS.RIDES_PATH).send({}).expect(HttpStatus.Unauthorized);
+    await request(app).post(SETTINGS.POSTS_PATH).send({}).expect(HttpStatus.Unauthorized_401);
 
     const invalidDataSet1 = await request(app)
-      .post(SETTINGS.RIDES_PATH)
+      .post(SETTINGS.POSTS_PATH)
       .set('Authorization', generateBasicAuthToken())
       .send({
         data: {
-          type: ResourceType.Rides,
+          type: ResourceType.Posts,
           attributes: {
             clientName: '   ',
             price: 'bla bla',
@@ -42,16 +42,16 @@ describe('Rides API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet1.body.errors).toHaveLength(6);
 
     const invalidDataSet2 = await request(app)
-      .post(SETTINGS.RIDES_PATH)
+      .post(SETTINGS.POSTS_PATH)
       .set('Authorization', generateBasicAuthToken())
       .send({
         data: {
-          type: ResourceType.Rides,
+          type: ResourceType.Posts,
           attributes: {
             clientName: 'LA',
             price: 0,
@@ -62,16 +62,16 @@ describe('Rides API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet2.body.errors).toHaveLength(5);
 
     const invalidDataSet3 = await request(app)
-      .post(SETTINGS.RIDES_PATH)
+      .post(SETTINGS.POSTS_PATH)
       .set('Authorization', generateBasicAuthToken())
       .send({
         data: {
-          type: ResourceType.Rides,
+          type: ResourceType.Posts,
           attributes: {
             driverId: 5000,
             clientName: 'Sam',
@@ -82,10 +82,10 @@ describe('Rides API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet3.body.errors).toHaveLength(1);
-    const getRidesListResponse = await request(app).get(SETTINGS.RIDES_PATH).set('Authorization', adminToken);
+    const getRidesListResponse = await request(app).get(SETTINGS.POSTS_PATH).set('Authorization', adminToken);
     expect(getRidesListResponse.body.data).toHaveLength(0);
   });
 
@@ -94,13 +94,13 @@ describe('Rides API body validation check', () => {
     const createdRideId = createdRide.data.id;
 
     await request(app)
-      .post(`${SETTINGS.RIDES_PATH}/${createdRideId}/actions/finish`)
+      .post(`${SETTINGS.POSTS_PATH}/${createdRideId}/actions/finish`)
       .set('Authorization', adminToken)
-      .expect(HttpStatus.NoContent);
+      .expect(HttpStatus.NoContent_204);
 
     await request(app)
-      .post(`${SETTINGS.RIDES_PATH}/${createdRideId}/actions/finish`)
+      .post(`${SETTINGS.POSTS_PATH}/${createdRideId}/actions/finish`)
       .set('Authorization', adminToken)
-      .expect(HttpStatus.UnprocessableEntity);
+      .expect(HttpStatus.UnprocessableEntity_422);
   });
 });

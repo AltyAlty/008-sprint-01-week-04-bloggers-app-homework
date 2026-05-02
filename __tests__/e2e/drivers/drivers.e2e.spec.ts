@@ -46,9 +46,9 @@ describe('Drivers API', () => {
     await Promise.all([createDriver(app), createDriver(app)]);
 
     const getDriverListResponse = await request(app)
-      .get(SETTINGS.DRIVERS_PATH)
+      .get(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok);
+      .expect(HttpStatus.Ok_200);
 
     expect(getDriverListResponse.body.data).toBeInstanceOf(Array);
     expect(getDriverListResponse.body.data.length).toBeGreaterThanOrEqual(2);
@@ -105,13 +105,13 @@ describe('Drivers API', () => {
     const createdDriverId = createdDriver.data.id;
 
     await request(app)
-      .delete(`${SETTINGS.DRIVERS_PATH}/${createdDriverId}`)
+      .delete(`${SETTINGS.BLOGS_PATH}/${createdDriverId}`)
       .set('Authorization', adminToken)
-      .expect(HttpStatus.NoContent);
+      .expect(HttpStatus.NoContent_204);
 
     await request(app)
-      .get(`${SETTINGS.DRIVERS_PATH}/${createdDriverId}`)
+      .get(`${SETTINGS.BLOGS_PATH}/${createdDriverId}`)
       .set('Authorization', adminToken)
-      .expect(HttpStatus.NotFound);
+      .expect(HttpStatus.NotFound_404);
   });
 });

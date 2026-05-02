@@ -9,7 +9,7 @@ export const superAdminGuardMiddleware = (req: Request, res: Response, next: Nex
 
   /*Если получить заголовок "Authorization" не удалось, то сообщаем об этом клиенту.*/
   if (!auth) {
-    res.sendStatus(HttpStatus.Unauthorized);
+    res.sendStatus(HttpStatus.Unauthorized_401);
     return;
   }
 
@@ -18,7 +18,7 @@ export const superAdminGuardMiddleware = (req: Request, res: Response, next: Nex
 
   /*Если тип авторизации не "Basic", то сообщаем об этом клиенту.*/
   if (authType !== 'Basic') {
-    res.sendStatus(HttpStatus.Unauthorized);
+    res.sendStatus(HttpStatus.Unauthorized_401);
     return;
   }
 
@@ -29,7 +29,7 @@ export const superAdminGuardMiddleware = (req: Request, res: Response, next: Nex
 
   /*Если логин и пароль не совпадают с заранее заданными значениями, то сообщаем об этом клиенту.*/
   if (username !== SETTINGS.BASIC_AUTH_ADMIN_USERNAME || password !== SETTINGS.BASIC_AUTH_ADMIN_PASSWORD) {
-    res.sendStatus(HttpStatus.Unauthorized);
+    res.sendStatus(HttpStatus.Unauthorized_401);
     return;
   }
 

@@ -19,7 +19,7 @@ export const defaultPaginationSettings: defaultPaginationSettingsType<string> = 
   sortDirection: DEFAULT_SORT_DIRECTION,
 };
 
-/*Middleware "paginationValidationMiddleWare" валидирует query-параметры, касающиеся пагинации:
+/*Middleware "paginationValidationMiddleware" валидирует query-параметры, касающиеся пагинации:
 1. "pageNumber": номер страницы должен быть строкой в виде числа, большего 0.
 2. "pageSize": размер страницы должен быть строкой в виде числа из диапазона от 1 до 100.
 3. "sortBy": поле сортировки данных на странице должно входить в список полей, по которым разрешена сортировка.
@@ -31,7 +31,7 @@ export const defaultPaginationSettings: defaultPaginationSettingsType<string> = 
 1. "<T extends string>": объявляется дженерик-параметр типа T, который является строкой или строковым литералом.
 2. "sortFieldsEnum: Record<string, T>": указывается, что функция принимает объект, где ключи являются любыми строками,
 а значения являются значения типа T.*/
-export const paginationValidationMiddleWare = <T extends string>(sortFieldsEnum: Record<string, T>) => {
+export const paginationValidationMiddleware = <T extends string>(sortFieldsEnum: Record<string, T>) => {
   /*Берем все значения из объекта "sortFieldsEnum" и формируем из них массив, обозначающий список полей, по которым
   разрешена сортировка.*/
   const allowedSortFields = Object.values(sortFieldsEnum);
@@ -42,13 +42,13 @@ export const paginationValidationMiddleWare = <T extends string>(sortFieldsEnum:
       .default(DEFAULT_PAGE_NUMBER)
       .isInt({ min: 1 })
       .withMessage('Page number must be a positive integer')
-      /*Преобразуем строку в целое число.*/
+      /*Преобразовываем строку в целое число.*/
       .toInt(),
 
     query('pageSize')
       .default(DEFAULT_PAGE_SIZE)
       .isInt({ min: 1, max: 100 })
-      .withMessage('Page size must be between 1 and 100')
+      .withMessage('Page size must be between 10 and 100')
       .toInt(),
 
     query('sortBy')
@@ -61,5 +61,7 @@ export const paginationValidationMiddleWare = <T extends string>(sortFieldsEnum:
       .default(DEFAULT_SORT_DIRECTION)
       .isIn(Object.values(SortDirection))
       .withMessage(`Sort direction must be one of: ${Object.values(SortDirection).join(', ')}`),
+
+    query('searchNameTerm').default(''),
   ];
 };

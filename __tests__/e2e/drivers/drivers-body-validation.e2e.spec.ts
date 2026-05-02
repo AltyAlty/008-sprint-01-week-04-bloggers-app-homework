@@ -33,15 +33,15 @@ describe('Drivers API body validation check', () => {
   it('❌ should not create a driver when incorrect body passed; POST /api/drivers', async () => {
     const correctTestDriverData: CreateDriverDataInputDTO = {
       data: {
-        type: ResourceType.Drivers,
+        type: ResourceType.Blogs,
         attributes: correctTestDriverAttributes,
       },
     };
 
-    await request(app).post(SETTINGS.DRIVERS_PATH).send(correctTestDriverData).expect(HttpStatus.Unauthorized);
+    await request(app).post(SETTINGS.BLOGS_PATH).send(correctTestDriverData).expect(HttpStatus.Unauthorized_401);
 
     const invalidDataSet1 = await request(app)
-      .post(SETTINGS.DRIVERS_PATH)
+      .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -59,12 +59,12 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet1.body.errors).toHaveLength(4);
 
     const invalidDataSet2 = await request(app)
-      .post(SETTINGS.DRIVERS_PATH)
+      .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -82,12 +82,12 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet2.body.errors).toHaveLength(4);
 
     const invalidDataSet3 = await request(app)
-      .post(SETTINGS.DRIVERS_PATH)
+      .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -105,10 +105,10 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet3.body.errors).toHaveLength(4);
-    const getDriverListResponse = await request(app).get(SETTINGS.DRIVERS_PATH).set('Authorization', adminToken);
+    const getDriverListResponse = await request(app).get(SETTINGS.BLOGS_PATH).set('Authorization', adminToken);
     expect(getDriverListResponse.body.data).toHaveLength(0);
   });
 
@@ -119,14 +119,14 @@ describe('Drivers API body validation check', () => {
 
     const correctTestDriverData: UpdateDriverDataInputDTO = {
       data: {
-        type: ResourceType.Drivers,
+        type: ResourceType.Blogs,
         id: createdDriverId,
         attributes: correctTestDriverAttributes,
       },
     };
 
     const invalidDataSet1 = await request(app)
-      .put(`${SETTINGS.DRIVERS_PATH}/${createdDriverId}`)
+      .put(`${SETTINGS.BLOGS_PATH}/${createdDriverId}`)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -144,12 +144,12 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet1.body.errors).toHaveLength(4);
 
     const invalidDataSet2 = await request(app)
-      .put(`${SETTINGS.DRIVERS_PATH}/${createdDriverId}`)
+      .put(`${SETTINGS.BLOGS_PATH}/${createdDriverId}`)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -167,12 +167,12 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet2.body.errors).toHaveLength(3);
 
     const invalidDataSet3 = await request(app)
-      .put(`${SETTINGS.DRIVERS_PATH}/${createdDriverId}`)
+      .put(`${SETTINGS.BLOGS_PATH}/${createdDriverId}`)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -190,7 +190,7 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     expect(invalidDataSet3.body.errors).toHaveLength(1);
     const getDriverResponse = await getDriverById(app, createdDriverId);
@@ -204,14 +204,14 @@ describe('Drivers API body validation check', () => {
 
     const correctTestDriverData: UpdateDriverDataInputDTO = {
       data: {
-        type: ResourceType.Drivers,
+        type: ResourceType.Blogs,
         id: createdDriverId,
         attributes: correctTestDriverAttributes,
       },
     };
 
     await request(app)
-      .put(`${SETTINGS.DRIVERS_PATH}/${createdDriverId}`)
+      .put(`${SETTINGS.BLOGS_PATH}/${createdDriverId}`)
       .set('Authorization', adminToken)
       .send({
         data: {
@@ -229,7 +229,7 @@ describe('Drivers API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest);
+      .expect(HttpStatus.BadRequest_404);
 
     const getDriverResponse = await getDriverById(app, createdDriverId);
     expect(getDriverResponse).toEqual({ ...createdDriver });

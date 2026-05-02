@@ -2,6 +2,6 @@
 export type PaginationMetaDataOutputDTO = {
   page: number;
   pageSize: number;
-  pageCount: number;
+  pagesCount: number;
   totalCount: number;
 };

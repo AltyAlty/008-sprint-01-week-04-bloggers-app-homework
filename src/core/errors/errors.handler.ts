@@ -9,13 +9,13 @@ export const errorsHandler = (error: unknown, res: Response): void => {
   /*Если перехваченная ошибка является ошибкой, когда сущность не была найдена в репозитории, то сообщаем об этом
   клиенту.*/
   if (error instanceof RepositoryNotFoundError) {
-    const httpStatus = HttpStatus.NotFound;
+    const httpStatus = HttpStatus.NotFound_404;
 
     res.status(httpStatus).send(
       createErrorMessages([
         {
-          status: httpStatus,
-          detail: error.message,
+          field: error.name,
+          message: error.message,
         },
       ]),
     );
@@ -26,15 +26,13 @@ export const errorsHandler = (error: unknown, res: Response): void => {
   /*Если же перехваченная ошибка является ошибкой, когда к сущности нельзя применить какую-то операцию в BLL, то
   сообщаем об этом клиенту.*/
   if (error instanceof DomainError) {
-    const httpStatus = HttpStatus.UnprocessableEntity;
+    const httpStatus = HttpStatus.UnprocessableEntity_422;
 
     res.status(httpStatus).send(
       createErrorMessages([
         {
-          status: httpStatus,
-          source: error.source,
-          detail: error.message,
-          code: error.code,
+          field: error.code,
+          message: error.message,
         },
       ]),
     );
@@ -43,6 +41,6 @@ export const errorsHandler = (error: unknown, res: Response): void => {
   }
 
   /*Если же перехваченная ошибка является ошибкой какого-то другого типа, то сообщаем об этом клиенту.*/
-  res.status(HttpStatus.InternalServerError);
+  res.status(HttpStatus.InternalServerError_500);
   return;
 };

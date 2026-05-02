@@ -3,11 +3,11 @@ import { Express } from 'express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
-/*Создаем объект, описывающий опции документации Swagger.*/
+/*Объект, описывающий опции документации Swagger.*/
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
-    info: { title: 'Uber API', version: '1.0.0', description: 'Uber API' },
+    info: { title: 'Bloggers API', version: '1.0.0', description: 'Bloggers API' },
   },
 
   /*Указываем откуда брать документацию для Swagger. В данном случае все файлы .yml в папке "src". С таким способом
