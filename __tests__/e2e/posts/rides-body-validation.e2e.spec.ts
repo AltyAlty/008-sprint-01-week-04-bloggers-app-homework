@@ -42,7 +42,7 @@ describe('Rides API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest_404);
+      .expect(HttpStatus.BadRequest_400);
 
     expect(invalidDataSet1.body.errors).toHaveLength(6);
 
@@ -62,7 +62,7 @@ describe('Rides API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest_404);
+      .expect(HttpStatus.BadRequest_400);
 
     expect(invalidDataSet2.body.errors).toHaveLength(5);
 
@@ -82,7 +82,7 @@ describe('Rides API body validation check', () => {
           },
         },
       })
-      .expect(HttpStatus.BadRequest_404);
+      .expect(HttpStatus.BadRequest_400);
 
     expect(invalidDataSet3.body.errors).toHaveLength(1);
     const getRidesListResponse = await request(app).get(SETTINGS.POSTS_PATH).set('Authorization', adminToken);

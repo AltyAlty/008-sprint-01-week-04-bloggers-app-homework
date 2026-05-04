@@ -28,7 +28,7 @@ export const inputValidationResultMiddleware = (req: Request<{}, {}, {}, {}>, re
 
   /*Если ошибки валидации были найдены, то сообщаем об этом клиенту.*/
   if (errors.length > 0) {
-    res.status(HttpStatus.BadRequest_404).json(createErrorMessages(errors));
+    res.status(HttpStatus.BadRequest_400).json(createErrorMessages(errors));
     return;
   }
 

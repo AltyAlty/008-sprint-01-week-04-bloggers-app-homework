@@ -3,19 +3,19 @@ import { Express } from 'express';
 import { HttpStatus } from '../../../src/core/types/http-statuses';
 import { generateBasicAuthToken } from '../auth/generate-admin-auth-token';
 import { SETTINGS } from '../../../src/core/settings/settings';
-import { WrappedDriverOutputDTO } from '../../../src/drivers/routers/output-dto/wrapped-driver.output-dto';
+import { PostOutputDTO } from '../../../src/posts/routes/output-dto/post.output-dto';
 
-export const getRideById = async (
+export const getPostById = async (
   app: Express,
-  rideId: string,
+  postId: string,
   expectedStatus?: HttpStatus,
-): Promise<WrappedDriverOutputDTO> => {
+): Promise<PostOutputDTO> => {
   const testStatus = expectedStatus ?? HttpStatus.Ok_200;
 
-  const getRideResponse = await request(app)
-    .get(`${SETTINGS.POSTS_PATH}/${rideId}`)
+  const getPostResponse = await request(app)
+    .get(`${SETTINGS.POSTS_PATH}/${postId}`)
     .set('Authorization', generateBasicAuthToken())
     .expect(testStatus);
 
-  return getRideResponse.body;
+  return getPostResponse.body;
 };
