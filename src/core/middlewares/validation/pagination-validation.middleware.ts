@@ -30,7 +30,7 @@ export const defaultPaginationSettings: defaultPaginationSettingsType<string> = 
 Касательно TS:
 1. "<T extends string>": объявляется дженерик-параметр типа T, который является строкой или строковым литералом.
 2. "sortFieldsEnum: Record<string, T>": указывается, что функция принимает объект, где ключи являются любыми строками,
-а значения являются значения типа T.*/
+а значения являются значениями типа T.*/
 export const paginationValidationMiddleware = <T extends string>(sortFieldsEnum: Record<string, T>) => {
   /*Берем все значения из объекта "sortFieldsEnum" и формируем из них массив, обозначающий список полей, по которым
   разрешена сортировка.*/
@@ -48,7 +48,7 @@ export const paginationValidationMiddleware = <T extends string>(sortFieldsEnum:
     query('pageSize')
       .default(DEFAULT_PAGE_SIZE)
       .isInt({ min: 1, max: 100 })
-      .withMessage('Page size must be between 10 and 100')
+      .withMessage('Page size must be between 1 and 100')
       .toInt(),
 
     query('sortBy')
@@ -62,6 +62,7 @@ export const paginationValidationMiddleware = <T extends string>(sortFieldsEnum:
       .isIn(Object.values(SortDirection))
       .withMessage(`Sort direction must be one of: ${Object.values(SortDirection).join(', ')}`),
 
-    query('searchNameTerm').default(''),
+    // /api/blogs?pageSize=5&pageNumber=1&searchNameTerm=Tim&sortDirection=asc&sortBy=name
+    query('searchNameTerm').optional(),
   ];
 };

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { CreatePostInExistingBlogInputDTO } from '../../../posts/routers/input-dto/create-post-in-existing-blog.input-dto';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { postsService } from '../../../posts/application/posts.service';
 import { mapToPostOutputDTO } from '../../../posts/repositories/mappers/map-to-post-output-dto.util';
 import { errorsHandler } from '../../../core/errors/errors.handler';
+import { CreatePostInExistingBlogInputDTO } from '../../../posts/routes/input-dto/create-post-in-existing-blog.input-dto';
 
 /*Функция-обработчик "createPostInExistingBlogByIdHandler()" для POST-запросов для добавления нового постав в
 существующий блог по ID при помощи URI-параметров.*/

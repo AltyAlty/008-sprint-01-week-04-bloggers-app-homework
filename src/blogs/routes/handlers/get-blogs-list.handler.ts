@@ -23,6 +23,7 @@ export const getBlogsListHandler = async (req: Request<{}, {}, {}, GetBlogsListQ
     /*Добавляем к объекту с query-параметрами поля, чтобы этот объект соответствовал типу
     "defaultPaginationSettingsType".*/
     const sanitizedQueryInputWithDefaultPaginationSettings = applyDefaultPaginationSettings(sanitizedQueryInput);
+    // const sanitizedQueryInputWithDefaultPaginationSettings = applyDefaultPaginationSettings(req.query);
     /*Просим сервис "blogsService" найти данные по блогам.*/
     const { items, totalCount } = await blogsService.findMany(sanitizedQueryInputWithDefaultPaginationSettings);
 

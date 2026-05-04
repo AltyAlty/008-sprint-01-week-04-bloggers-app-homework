@@ -2,8 +2,8 @@ import { Filter, ObjectId, WithId } from 'mongodb';
 import { RepositoryNotFoundError } from '../../core/errors/repository-not-found.error';
 import { blogsCollection } from '../../db/mongodb/mongo.db';
 import { BlogType } from '../types/blog.type';
-import { GetBlogsListQueryInputDTO } from '../routers/input-dto/get-blogs-list-query.input-dto';
-import { UpdateBlogInputDTO } from '../routers/input-dto/update-blog.input-dto';
+import { UpdateBlogInputDTO } from '../routes/input-dto/update-blog.input-dto';
+import { GetBlogsListQueryInputDTO } from '../routes/input-dto/get-blogs-list-query.input-dto';
 
 /*Репозиторий "blogsRepository" для работы с данными по блогам в БД.*/
 export const blogsRepository = {

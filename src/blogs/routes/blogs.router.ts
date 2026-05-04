@@ -11,9 +11,9 @@ import { superAdminGuardMiddleware } from '../../auth/middlewares/super-admin.gu
 import { paginationValidationMiddleware } from '../../core/middlewares/validation/pagination-validation.middleware';
 import { getPostsListByBlogIdHandler } from './handlers/get-posts-list-by-blog-id.handler';
 import { BlogSortFieldInputDTO } from './input-dto/blog-sort-field.input-dto';
-import { PostSortFieldInputDTO } from '../../posts/routers/input-dto/post-sort-field.input-dto';
 import { postInExistingBlogCreateInputValidation } from '../../posts/validation/post-input-validation.middlewares';
 import { createPostInExistingBlogByIdHandler } from './handlers/creat-post-in-blog-by-id.handler';
+import { PostSortFieldInputDTO } from '../../posts/routes/input-dto/post-sort-field.input-dto';
 
 /*Роутер из Express для работы с данными по блогам.*/
 export const blogsRouter = Router({});

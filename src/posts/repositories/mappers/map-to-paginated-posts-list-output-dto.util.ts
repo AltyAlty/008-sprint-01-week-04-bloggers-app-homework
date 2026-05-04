@@ -1,7 +1,7 @@
 import { WithId } from 'mongodb';
 import { PostType } from '../../types/post.type';
-import { PaginatedPostsListOutputDTO } from '../../routers/output-dto/paginated-posts-list.output-dto';
-import { PostOutputDTO } from '../../routers/output-dto/post.output-dto';
+import { PaginatedPostsListOutputDTO } from '../../routes/output-dto/paginated-posts-list.output-dto';
+import { PostOutputDTO } from '../../routes/output-dto/post.output-dto';
 
 export const mapToPaginatedPostsListOutputDTO = (
   posts: WithId<PostType>[],

@@ -1,11 +1,11 @@
 import { blogsRepository } from '../repositories/blogs.repository';
 import { BlogType } from '../types/blog.type';
-import { CreateBlogInputDTO } from '../routers/input-dto/create-blog.input-dto';
 import { ObjectId, WithId } from 'mongodb';
-import { GetBlogsListQueryInputDTO } from '../routers/input-dto/get-blogs-list-query.input-dto';
-import { UpdateBlogInputDTO } from '../routers/input-dto/update-blog.input-dto';
 import { postsRepository } from '../../posts/repositories/posts.repository';
 import { postsService } from '../../posts/application/posts.service';
+import { GetBlogsListQueryInputDTO } from '../routes/input-dto/get-blogs-list-query.input-dto';
+import { CreateBlogInputDTO } from '../routes/input-dto/create-blog.input-dto';
+import { UpdateBlogInputDTO } from '../routes/input-dto/update-blog.input-dto';
 
 /*Сервис "blogsService" для работы с данными по блогам.*/
 export const blogsService = {

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { errorsHandler } from '../../../core/errors/errors.handler';
-import { GetPostsListInExistingBlogQueryInputDTO } from '../../../posts/routers/input-dto/get-posts-list-in-existing-blog-query.input-dto';
 import { matchedData } from 'express-validator';
 import { applyDefaultPaginationSettings } from '../../../core/utils/pagination/apply-default-pagination-settings';
 import { mapToPaginatedPostsListOutputDTO } from '../../../posts/repositories/mappers/map-to-paginated-posts-list-output-dto.util';
 import { postsService } from '../../../posts/application/posts.service';
+import { GetPostsListInExistingBlogQueryInputDTO } from '../../../posts/routes/input-dto/get-posts-list-in-existing-blog-query.input-dto';
 
 /*Функция-обработчик "getPostsListByBlogIdHandler()" для GET-запросов для получения данных по всем постам в существующем
 блоге по ID с пагинацией при помощи URI-параметров.*/

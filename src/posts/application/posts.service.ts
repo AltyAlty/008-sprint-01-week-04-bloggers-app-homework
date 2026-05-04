@@ -1,12 +1,12 @@
 import { postsRepository } from '../repositories/posts.repository';
 import { PostType } from '../types/post.type';
-import { CreatePostInputDTO } from '../routers/input-dto/create-post.input-dto';
-import { CreatePostInExistingBlogInputDTO } from '../routers/input-dto/create-post-in-existing-blog.input-dto';
-import { GetPostsListQueryInputDTO } from '../routers/input-dto/get-posts-list-query.input-dto';
 import { ObjectId, WithId } from 'mongodb';
 import { blogsRepository } from '../../blogs/repositories/blogs.repository';
 import { blogsService } from '../../blogs/application/blogs.service';
-import { UpdatePostInputDTO } from '../routers/input-dto/update-post.input-dto';
+import { GetPostsListQueryInputDTO } from '../routes/input-dto/get-posts-list-query.input-dto';
+import { CreatePostInputDTO } from '../routes/input-dto/create-post.input-dto';
+import { CreatePostInExistingBlogInputDTO } from '../routes/input-dto/create-post-in-existing-blog.input-dto';
+import { UpdatePostInputDTO } from '../routes/input-dto/update-post.input-dto';
 
 export const postsService = {
   async findMany(queryDTO: GetPostsListQueryInputDTO): Promise<{ items: WithId<PostType>[]; totalCount: number }> {

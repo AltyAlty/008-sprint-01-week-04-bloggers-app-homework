@@ -1,6 +1,6 @@
 import { WithId } from 'mongodb';
-import { PostOutputDTO } from '../../routers/output-dto/post.output-dto';
 import { PostType } from '../../types/post.type';
+import { PostOutputDTO } from '../../routes/output-dto/post.output-dto';
 
 export const mapToPostOutputDTO = (post: WithId<PostType>): PostOutputDTO => {
   return {

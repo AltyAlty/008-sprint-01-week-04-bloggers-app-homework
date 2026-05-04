@@ -1,6 +1,6 @@
 import { WithId } from 'mongodb';
 import { BlogType } from '../../types/blog.type';
-import { BlogOutputDTO } from '../../routers/output-dto/blog.output-dto';
+import { BlogOutputDTO } from '../../routes/output-dto/blog.output-dto';
 
 /*Функция "mapToBlogOutputDTO()" преобразовывает данные по блогу из БД в подготовленные для отправки клиенту данные.*/
 export const mapToBlogOutputDTO = (blog: WithId<BlogType>): BlogOutputDTO => {

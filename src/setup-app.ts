@@ -1,10 +1,10 @@
 import express, { Express, Request, Response } from 'express';
-import { testingRouter } from './testing/routers/testing.router';
 import { HttpStatus } from './core/types/http-statuses';
 import { setupSwagger } from './core/swagger/setup-swagger';
 import { SETTINGS } from './core/settings/settings';
-import { blogsRouter } from './blogs/routers/blogs.router';
-import { postsRouter } from './posts/routers/posts.router';
+import { blogsRouter } from './blogs/routes/blogs.router';
+import { postsRouter } from './posts/routes/posts.router';
+import { testingRouter } from './testing/routes/testing.router';
 
 /*Функция "setupApp()" для конфигурирования экземпляров приложения Express.*/
 export const setupApp = async (app: Express) => {

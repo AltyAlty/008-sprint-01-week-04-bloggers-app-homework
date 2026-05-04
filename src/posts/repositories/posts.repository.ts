@@ -1,9 +1,9 @@
 import { postsCollection } from '../../db/mongodb/mongo.db';
 import { PostType } from '../types/post.type';
-import { GetPostsListQueryInputDTO } from '../routers/input-dto/get-posts-list-query.input-dto';
 import { Filter, ObjectId, WithId } from 'mongodb';
 import { RepositoryNotFoundError } from '../../core/errors/repository-not-found.error';
-import { UpdatePostInputDTO } from '../routers/input-dto/update-post.input-dto';
+import { GetPostsListQueryInputDTO } from '../routes/input-dto/get-posts-list-query.input-dto';
+import { UpdatePostInputDTO } from '../routes/input-dto/update-post.input-dto';
 
 export const postsRepository = {
   async findMany(queryDTO: GetPostsListQueryInputDTO): Promise<{ items: WithId<PostType>[]; totalCount: number }> {
