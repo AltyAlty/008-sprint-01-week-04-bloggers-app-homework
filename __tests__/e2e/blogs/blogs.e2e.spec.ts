@@ -16,6 +16,7 @@ import { createPost } from '../../utils/posts/create-post';
 import { getCreatePostInputDTO } from '../../utils/posts/get-create-post-input-dto';
 import { BlogOutputDTO } from '../../../src/blogs/routes/output-dto/blog.output-dto';
 import { CreatePostInputDTO } from '../../../src/posts/routes/input-dto/create-post.input-dto';
+import { getUpdateBlogInputDTO } from '../../utils/blogs/get-update-blog-input-dto';
 
 /*Тестовый набор.*/
 describe('Blogs API endpoints check', () => {
@@ -43,26 +44,17 @@ describe('Blogs API endpoints check', () => {
 
   /*Описываем тесты.*/
   it('✅ 001 should create a blog; POST /api/blogs', async () => {
-    await createBlog(app);
-
-    const getBlogsListResponse = await request(app)
-      .get(SETTINGS.BLOGS_PATH)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const createdBlog: BlogOutputDTO = await createBlog(app);
+    const getBlogsListResponse = await request(app).get(SETTINGS.BLOGS_PATH).expect(HttpStatus.Ok_200);
     expect(getBlogsListResponse.body.items).toBeInstanceOf(Array);
     expect(getBlogsListResponse.body.items.length).toBe(1);
     expect(getBlogsListResponse.body.totalCount).toBe(1);
+    expect(getBlogsListResponse.body.items[0]).toEqual({ ...createdBlog });
   });
 
   it('✅ 002 should return a list of blogs; GET /api/blogs', async () => {
     await Promise.all([createBlog(app), createBlog(app)]);
-
-    const getBlogsListResponse = await request(app)
-      .get(SETTINGS.BLOGS_PATH)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const getBlogsListResponse = await request(app).get(SETTINGS.BLOGS_PATH).expect(HttpStatus.Ok_200);
     expect(getBlogsListResponse.body.items).toBeInstanceOf(Array);
     expect(getBlogsListResponse.body.items.length).toBe(2);
     expect(getBlogsListResponse.body.totalCount).toBe(2);
@@ -87,11 +79,10 @@ describe('Blogs API endpoints check', () => {
     const sortBy = 'name';
 
     const getBlogsListResponse = await request(app)
-      // /api/blogs?pageSize=5&pageNumber=1&searchNameTerm=Tim&sortDirection=asc&sortBy=name
+      /*Example: /api/blogs?pageSize=5&pageNumber=1&searchNameTerm=Tim&sortDirection=asc&sortBy=name*/
       .get(
         `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&searchNameTerm=${searchNameTerm}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
       )
-      .set('Authorization', adminToken)
       .expect(HttpStatus.Ok_200);
 
     expect(getBlogsListResponse.body.items).toBeInstanceOf(Array);
@@ -119,7 +110,6 @@ describe('Blogs API endpoints check', () => {
 
     const getPostsListByBlogIdResponse = await request(app)
       .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=5`)
-      .set('Authorization', adminToken)
       .expect(HttpStatus.Ok_200);
 
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
@@ -130,25 +120,24 @@ describe('Blogs API endpoints check', () => {
   it('✅ 005 should create a post for an existing blog specified by ID; POST /api/blogs/:blogId/posts', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
-    const createdPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
+    const createPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
 
     await request(app)
       .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
       .set('Authorization', adminToken)
-      .send(createdPostData)
+      .send(createPostData)
       .expect(HttpStatus.Created_201);
 
     const getPostsListByBlogIdResponse = await request(app)
       .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
-      .set('Authorization', adminToken)
       .expect(HttpStatus.Ok_200);
 
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
     expect(getPostsListByBlogIdResponse.body.items.length).toBe(1);
     expect(getPostsListByBlogIdResponse.body.totalCount).toBe(1);
-    expect(getPostsListByBlogIdResponse.body.items[0].title).toBe(createdPostData.title);
-    expect(getPostsListByBlogIdResponse.body.items[0].shortDescription).toBe(createdPostData.shortDescription);
-    expect(getPostsListByBlogIdResponse.body.items[0].content).toBe(createdPostData.content);
+    expect(getPostsListByBlogIdResponse.body.items[0].title).toBe(createPostData.title);
+    expect(getPostsListByBlogIdResponse.body.items[0].shortDescription).toBe(createPostData.shortDescription);
+    expect(getPostsListByBlogIdResponse.body.items[0].content).toBe(createPostData.content);
     expect(getPostsListByBlogIdResponse.body.items[0].blogId).toBe(createdBlogId);
   });
 
@@ -162,13 +151,7 @@ describe('Blogs API endpoints check', () => {
   it('✅ 007 should update a blog by ID; PUT /api/blogs/:id', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
-
-    const updateBlogData: UpdateBlogInputDTO = {
-      name: 'upd name 02',
-      description: 'upd description 02',
-      websiteUrl: 'https://www.updwebsiteurl01.com/blog-02',
-    };
-
+    const updateBlogData: UpdateBlogInputDTO = getUpdateBlogInputDTO();
     await updateBlogById(app, createdBlogId, updateBlogData);
     const getBlogByIdResponse: BlogOutputDTO = await getBlogById(app, createdBlogId);
 
@@ -191,9 +174,6 @@ describe('Blogs API endpoints check', () => {
       .set('Authorization', adminToken)
       .expect(HttpStatus.NoContent_204);
 
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.NotFound_404);
+    await request(app).get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`).expect(HttpStatus.NotFound_404);
   });
 });

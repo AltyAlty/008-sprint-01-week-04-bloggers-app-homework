@@ -16,6 +16,7 @@ import { getBlogById } from '../../utils/blogs/get-blog-by-id';
 import { UpdateBlogInputDTO } from '../../../src/blogs/routes/input-dto/update-blog.input-dto';
 import { BlogOutputDTO } from '../../../src/blogs/routes/output-dto/blog.output-dto';
 import { CreatePostInputDTO } from '../../../src/posts/routes/input-dto/create-post.input-dto';
+import { getUpdateBlogInputDTO } from '../../utils/blogs/get-update-blog-input-dto';
 
 describe('Blogs API ID, body and auth validation checks', () => {
   const app = express();
@@ -29,7 +30,10 @@ describe('Blogs API ID, body and auth validation checks', () => {
 
   beforeEach(async () => await clearDb(app));
 
-  afterAll(async () => await stopDb());
+  afterAll(async () => {
+    await clearDb(app);
+    await stopDb();
+  });
 
   it('❌ 001 should not return a list of blogs when incorrect pagination settings passed; GET /api/blogs', async () => {
     await Promise.all([createBlog(app), createBlog(app)]);
@@ -37,71 +41,41 @@ describe('Blogs API ID, body and auth validation checks', () => {
     const pageNumber = 1;
     const sortDirection = 'asc';
     const sortBy = 'name';
+    const correctQuery = `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`;
     const incorrectPageSize = 101;
     const incorrectPageNumber = -1;
     const incorrectSortDirection = 'cas';
     const incorrectSortBy = 'shortDescription';
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}?pageSize=${incorrectPageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${incorrectPageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${incorrectSortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${incorrectSortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    const getBlogsListResponse = await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const incorrectQuery1 = `${SETTINGS.BLOGS_PATH}?pageSize=${incorrectPageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`;
+    const incorrectQuery2 = `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${incorrectPageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`;
+    const incorrectQuery3 = `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${incorrectSortDirection}&sortBy=${sortBy}`;
+    const incorrectQuery4 = `${SETTINGS.BLOGS_PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${incorrectSortBy}`;
+    await request(app).get(incorrectQuery1).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectQuery2).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectQuery3).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectQuery4).expect(HttpStatus.BadRequest_400);
+    const getBlogsListResponse = await request(app).get(correctQuery).expect(HttpStatus.Ok_200);
     expect(getBlogsListResponse.body.items).toBeInstanceOf(Array);
     expect(getBlogsListResponse.body.items.length).toBe(2);
     expect(getBlogsListResponse.body.totalCount).toBe(2);
   });
 
   it('❌ 002 should not create a blog without proper basic authorization; POST /api/blogs', async () => {
-    await request(app).post(SETTINGS.BLOGS_PATH).send(getCreateBlogInputDTO()).expect(HttpStatus.Unauthorized_401);
-
-    const getBlogsListResponse = await request(app)
-      .get(SETTINGS.BLOGS_PATH)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const correctCreateBlogData: CreateBlogInputDTO = getCreateBlogInputDTO();
+    await request(app).post(SETTINGS.BLOGS_PATH).send(correctCreateBlogData).expect(HttpStatus.Unauthorized_401);
+    const getBlogsListResponse = await request(app).get(SETTINGS.BLOGS_PATH).expect(HttpStatus.Ok_200);
     expect(getBlogsListResponse.body.items).toBeInstanceOf(Array);
     expect(getBlogsListResponse.body.items.length).toBe(0);
     expect(getBlogsListResponse.body.totalCount).toBe(0);
   });
 
   it('❌ 003 should not create a blog when incorrect body passed; POST /api/blogs', async () => {
-    const correctBlogData: CreateBlogInputDTO = getCreateBlogInputDTO();
+    const correctCreateBlogData: CreateBlogInputDTO = getCreateBlogInputDTO();
 
     await request(app)
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
-      .send({ name: '', description: correctBlogData.description, websiteUrl: correctBlogData.websiteUrl })
+      .send({ name: '', description: correctCreateBlogData.description, websiteUrl: correctCreateBlogData.websiteUrl })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
@@ -109,8 +83,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .set('Authorization', adminToken)
       .send({
         name: '0123456789111111',
-        description: correctBlogData.description,
-        websiteUrl: correctBlogData.websiteUrl,
+        description: correctCreateBlogData.description,
+        websiteUrl: correctCreateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -119,8 +93,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .set('Authorization', adminToken)
       .send({
         name: '   ',
-        description: correctBlogData.description,
-        websiteUrl: correctBlogData.websiteUrl,
+        description: correctCreateBlogData.description,
+        websiteUrl: correctCreateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -128,9 +102,9 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
-        name: correctBlogData.name,
+        name: correctCreateBlogData.name,
         description: '',
-        websiteUrl: correctBlogData.websiteUrl,
+        websiteUrl: correctCreateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -138,9 +112,9 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
-        name: correctBlogData.name,
+        name: correctCreateBlogData.name,
         description: '   ',
-        websiteUrl: correctBlogData.websiteUrl,
+        websiteUrl: correctCreateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -148,9 +122,9 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
-        name: correctBlogData.name,
+        name: correctCreateBlogData.name,
         description: null,
-        websiteUrl: correctBlogData.websiteUrl,
+        websiteUrl: correctCreateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -158,8 +132,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
-        name: correctBlogData.name,
-        description: correctBlogData.description,
+        name: correctCreateBlogData.name,
+        description: correctCreateBlogData.description,
         websiteUrl: '',
       })
       .expect(HttpStatus.BadRequest_400);
@@ -168,8 +142,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
-        name: correctBlogData.name,
-        description: correctBlogData.description,
+        name: correctCreateBlogData.name,
+        description: correctCreateBlogData.description,
         websiteUrl: '   ',
       })
       .expect(HttpStatus.BadRequest_400);
@@ -178,17 +152,13 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .post(SETTINGS.BLOGS_PATH)
       .set('Authorization', adminToken)
       .send({
-        name: correctBlogData.name,
-        description: correctBlogData.description,
+        name: correctCreateBlogData.name,
+        description: correctCreateBlogData.description,
         websiteUrl: 'www.websiteurl01.com/blog-01',
       })
       .expect(HttpStatus.BadRequest_400);
 
-    const getBlogsListResponse = await request(app)
-      .get(SETTINGS.BLOGS_PATH)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const getBlogsListResponse = await request(app).get(SETTINGS.BLOGS_PATH).expect(HttpStatus.Ok_200);
     expect(getBlogsListResponse.body.items).toBeInstanceOf(Array);
     expect(getBlogsListResponse.body.items.length).toBe(0);
     expect(getBlogsListResponse.body.totalCount).toBe(0);
@@ -202,32 +172,16 @@ describe('Blogs API ID, body and auth validation checks', () => {
     const incorrectBlogId2 = null;
     const incorrectBlogId3 = 'ABC';
     const incorrectBlogId4 = 2;
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}/posts`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}/posts`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}/posts`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId4}/posts`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    const getPostsListByBlogIdResponse = await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const incorrectURL1 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}/posts`;
+    const incorrectURL2 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}/posts`;
+    const incorrectURL3 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}/posts`;
+    const incorrectURL4 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId4}/posts`;
+    const correctURL = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`;
+    await request(app).get(incorrectURL1).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectURL2).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectURL3).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectURL4).expect(HttpStatus.BadRequest_400);
+    const getPostsListByBlogIdResponse = await request(app).get(correctURL).expect(HttpStatus.Ok_200);
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
     expect(getPostsListByBlogIdResponse.body.items.length).toBe(2);
     expect(getPostsListByBlogIdResponse.body.totalCount).toBe(2);
@@ -240,10 +194,15 @@ describe('Blogs API ID, body and auth validation checks', () => {
     const pageNumber = 1;
     const sortDirection = 'asc';
     const sortBy = 'title';
+    const correctQuery = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`;
     const incorrectPageSize = 101;
     const incorrectPageNumber = -1;
     const incorrectSortDirection = 'cas';
     const incorrectSortBy = 'description';
+    const incorrectQuery1 = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${incorrectPageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`;
+    const incorrectQuery2 = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${incorrectPageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`;
+    const incorrectQuery3 = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${incorrectSortDirection}&sortBy=${sortBy}`;
+    const incorrectQuery4 = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${incorrectSortBy}`;
 
     await Promise.all([
       createPost(app, undefined, createdBlogId),
@@ -254,41 +213,11 @@ describe('Blogs API ID, body and auth validation checks', () => {
       createPost(app, undefined, createdBlogId),
     ]);
 
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${incorrectPageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${incorrectPageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${incorrectSortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${incorrectSortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    const getPostsListByBlogIdResponse = await request(app)
-      .get(
-        `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=${pageSize}&pageNumber=${pageNumber}&sortDirection=${sortDirection}&sortBy=${sortBy}`,
-      )
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    await request(app).get(incorrectQuery1).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectQuery2).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectQuery3).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectQuery4).expect(HttpStatus.BadRequest_400);
+    const getPostsListByBlogIdResponse = await request(app).get(correctQuery).expect(HttpStatus.Ok_200);
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
     expect(getPostsListByBlogIdResponse.body.items.length).toBe(5);
     expect(getPostsListByBlogIdResponse.body.totalCount).toBe(6);
@@ -297,16 +226,15 @@ describe('Blogs API ID, body and auth validation checks', () => {
   it('❌ 006 should not create a post for an existing blog specified by ID without proper basic authorization; POST /api/blogs/:blogId/posts', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
-    const createdPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
+    const createPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
 
     await request(app)
       .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
-      .send(createdPostData)
+      .send(createPostData)
       .expect(HttpStatus.Unauthorized_401);
 
     const getPostsListByBlogIdResponse = await request(app)
       .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts?pageSize=5`)
-      .set('Authorization', adminToken)
       .expect(HttpStatus.Ok_200);
 
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
@@ -317,39 +245,42 @@ describe('Blogs API ID, body and auth validation checks', () => {
   it('❌ 007 should not create a post for an existing blog specified by incorrect ID; POST /api/blogs/:blogId/posts', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
-    const createdPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
+    const createPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
     const incorrectBlogId1 = '   ';
     const incorrectBlogId2 = null;
     const incorrectBlogId3 = 'ABC';
     const incorrectBlogId4 = 2;
+    const incorrectURL1 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}/posts`;
+    const incorrectURL2 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}/posts`;
+    const incorrectURL3 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}/posts`;
+    const incorrectURL4 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId4}/posts`;
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}/posts`)
+      .post(incorrectURL1)
       .set('Authorization', adminToken)
-      .send(createdPostData)
+      .send(createPostData)
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}/posts`)
+      .post(incorrectURL2)
       .set('Authorization', adminToken)
-      .send(createdPostData)
+      .send(createPostData)
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}/posts`)
+      .post(incorrectURL3)
       .set('Authorization', adminToken)
-      .send(createdPostData)
+      .send(createPostData)
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId4}/posts`)
+      .post(incorrectURL4)
       .set('Authorization', adminToken)
-      .send(createdPostData)
+      .send(createPostData)
       .expect(HttpStatus.BadRequest_400);
 
     const getPostsListByBlogIdResponse = await request(app)
       .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
-      .set('Authorization', adminToken)
       .expect(HttpStatus.Ok_200);
 
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
@@ -360,112 +291,109 @@ describe('Blogs API ID, body and auth validation checks', () => {
   it('❌ 008 should not create a post for an existing blog specified by ID when incorrect body passed; POST /api/blogs/:blogId/posts', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
-    const correctPostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
+    const correctCreatePostData: CreatePostInputDTO = getCreatePostInputDTO(createdBlogId);
+    const correctURL = `${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`;
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
         title: '',
-        shortDescription: correctPostData.shortDescription,
-        content: correctPostData.content,
+        shortDescription: correctCreatePostData.shortDescription,
+        content: correctCreatePostData.content,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
         title: '0123456789012345678901234567890',
-        shortDescription: correctPostData.shortDescription,
-        content: correctPostData.content,
+        shortDescription: correctCreatePostData.shortDescription,
+        content: correctCreatePostData.content,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
         title: '   ',
-        shortDescription: correctPostData.shortDescription,
-        content: correctPostData.content,
+        shortDescription: correctCreatePostData.shortDescription,
+        content: correctCreatePostData.content,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
-        title: correctPostData.title,
+        title: correctCreatePostData.title,
         shortDescription: '',
-        content: correctPostData.content,
+        content: correctCreatePostData.content,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
-        title: correctPostData.title,
+        title: correctCreatePostData.title,
         shortDescription: null,
-        content: correctPostData.content,
+        content: correctCreatePostData.content,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
-        title: correctPostData.title,
+        title: correctCreatePostData.title,
         shortDescription: '   ',
-        content: correctPostData.content,
+        content: correctCreatePostData.content,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
-        title: correctPostData.title,
-        shortDescription: correctPostData.shortDescription,
+        title: correctCreatePostData.title,
+        shortDescription: correctCreatePostData.shortDescription,
         content: '',
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
-        title: correctPostData.title,
-        shortDescription: correctPostData.shortDescription,
+        title: correctCreatePostData.title,
+        shortDescription: correctCreatePostData.shortDescription,
         content: null,
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .post(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
+      .post(correctURL)
       .set('Authorization', adminToken)
       .send({
-        title: correctPostData.title,
-        shortDescription: correctPostData.shortDescription,
+        title: correctCreatePostData.title,
+        shortDescription: correctCreatePostData.shortDescription,
         content: '   ',
         blogId: createdBlogId,
       })
       .expect(HttpStatus.BadRequest_400);
 
-    const getPostsListByBlogIdResponse = await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${createdBlogId}/posts`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.Ok_200);
-
+    const getPostsListByBlogIdResponse = await request(app).get(correctURL).expect(HttpStatus.Ok_200);
     expect(getPostsListByBlogIdResponse.body.items).toBeInstanceOf(Array);
     expect(getPostsListByBlogIdResponse.body.items.length).toBe(0);
     expect(getPostsListByBlogIdResponse.body.totalCount).toBe(0);
@@ -477,22 +405,12 @@ describe('Blogs API ID, body and auth validation checks', () => {
     const incorrectBlogId1 = null;
     const incorrectBlogId2 = 'ABC';
     const incorrectBlogId3 = 2;
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .get(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
+    const incorrectURL1 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}`;
+    const incorrectURL2 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}`;
+    const incorrectURL3 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}`;
+    await request(app).get(incorrectURL1).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectURL2).expect(HttpStatus.BadRequest_400);
+    await request(app).get(incorrectURL3).expect(HttpStatus.BadRequest_400);
     const getBlogByIdResponse = await getBlogById(app, createdBlogId);
     expect(getBlogByIdResponse).toEqual({ ...createdBlog });
   });
@@ -500,12 +418,7 @@ describe('Blogs API ID, body and auth validation checks', () => {
   it('❌ 010 should not update a blog specified by ID without proper basic authorization; PUT /api/blogs/:id', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
-
-    const updateBlogData: UpdateBlogInputDTO = {
-      name: 'upd name 02',
-      description: 'upd description 02',
-      websiteUrl: 'https://www.updwebsiteurl01.com/blog-02',
-    };
+    const updateBlogData: UpdateBlogInputDTO = getUpdateBlogInputDTO();
 
     await request(app)
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
@@ -530,27 +443,25 @@ describe('Blogs API ID, body and auth validation checks', () => {
     const incorrectBlogId1 = null;
     const incorrectBlogId2 = 'ABC';
     const incorrectBlogId3 = 2;
-
-    const updateBlogData: UpdateBlogInputDTO = {
-      name: 'upd name 02',
-      description: 'upd description 02',
-      websiteUrl: 'https://www.updwebsiteurl01.com/blog-02',
-    };
+    const incorrectURL1 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}`;
+    const incorrectURL2 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}`;
+    const incorrectURL3 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}`;
+    const updateBlogData: UpdateBlogInputDTO = getUpdateBlogInputDTO();
 
     await request(app)
-      .put(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}`)
+      .put(incorrectURL1)
       .set('Authorization', adminToken)
       .send(updateBlogData)
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .put(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}`)
+      .put(incorrectURL2)
       .set('Authorization', adminToken)
       .send(updateBlogData)
       .expect(HttpStatus.BadRequest_400);
 
     await request(app)
-      .put(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}`)
+      .put(incorrectURL3)
       .set('Authorization', adminToken)
       .send(updateBlogData)
       .expect(HttpStatus.BadRequest_400);
@@ -570,14 +481,15 @@ describe('Blogs API ID, body and auth validation checks', () => {
   it('❌ 012 should not update a blog specified by ID when incorrect body passed; PUT /api/blogs/:id', async () => {
     const createdBlog: BlogOutputDTO = await createBlog(app);
     const createdBlogId: string = createdBlog.id;
+    const correctUpdateBlogData: UpdateBlogInputDTO = getUpdateBlogInputDTO();
 
     await request(app)
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
         name: '',
-        description: 'upd description 01',
-        websiteUrl: 'https://www.updwebsiteurl01.com/blog-01',
+        description: correctUpdateBlogData.description,
+        websiteUrl: correctUpdateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -586,8 +498,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .set('Authorization', adminToken)
       .send({
         name: '   ',
-        description: 'upd description 01',
-        websiteUrl: 'https://www.updwebsiteurl01.com/blog-01',
+        description: correctUpdateBlogData.description,
+        websiteUrl: correctUpdateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -596,8 +508,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .set('Authorization', adminToken)
       .send({
         name: '0123456789111111',
-        description: 'upd description 01',
-        websiteUrl: 'https://www.updwebsiteurl01.com/blog-01',
+        description: correctUpdateBlogData.description,
+        websiteUrl: correctUpdateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -605,9 +517,9 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
-        name: 'upd name 01',
+        name: correctUpdateBlogData.name,
         description: '',
-        websiteUrl: 'https://www.updwebsiteurl01.com/blog-01',
+        websiteUrl: correctUpdateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -615,9 +527,9 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
-        name: 'upd name 01',
+        name: correctUpdateBlogData.name,
         description: '   ',
-        websiteUrl: 'https://www.updwebsiteurl01.com/blog-01',
+        websiteUrl: correctUpdateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -625,9 +537,9 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
-        name: 'upd name 01',
+        name: correctUpdateBlogData.name,
         description: null,
-        websiteUrl: 'https://www.updwebsiteurl01.com/blog-01',
+        websiteUrl: correctUpdateBlogData.websiteUrl,
       })
       .expect(HttpStatus.BadRequest_400);
 
@@ -635,8 +547,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
-        name: 'upd name 01',
-        description: 'upd description 01',
+        name: correctUpdateBlogData.name,
+        description: correctUpdateBlogData.description,
         websiteUrl: '',
       })
       .expect(HttpStatus.BadRequest_400);
@@ -645,8 +557,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
-        name: 'upd name 01',
-        description: 'upd description 01',
+        name: correctUpdateBlogData.name,
+        description: correctUpdateBlogData.description,
         websiteUrl: '   ',
       })
       .expect(HttpStatus.BadRequest_400);
@@ -655,8 +567,8 @@ describe('Blogs API ID, body and auth validation checks', () => {
       .put(`${SETTINGS.BLOGS_PATH}/${createdBlogId}`)
       .set('Authorization', adminToken)
       .send({
-        name: 'upd name 01',
-        description: 'upd description 01',
+        name: correctUpdateBlogData.name,
+        description: correctUpdateBlogData.description,
         websiteUrl: 'www.updwebsiteurl01.com/blog-01',
       })
       .expect(HttpStatus.BadRequest_400);
@@ -687,22 +599,12 @@ describe('Blogs API ID, body and auth validation checks', () => {
     const incorrectBlogId1 = null;
     const incorrectBlogId2 = 'ABC';
     const incorrectBlogId3 = 2;
-
-    await request(app)
-      .delete(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .delete(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
-    await request(app)
-      .delete(`${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}`)
-      .set('Authorization', adminToken)
-      .expect(HttpStatus.BadRequest_400);
-
+    const incorrectURL1 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId1}`;
+    const incorrectURL2 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId2}`;
+    const incorrectURL3 = `${SETTINGS.BLOGS_PATH}/${incorrectBlogId3}`;
+    await request(app).delete(incorrectURL1).set('Authorization', adminToken).expect(HttpStatus.BadRequest_400);
+    await request(app).delete(incorrectURL2).set('Authorization', adminToken).expect(HttpStatus.BadRequest_400);
+    await request(app).delete(incorrectURL3).set('Authorization', adminToken).expect(HttpStatus.BadRequest_400);
     const getBlogByIdResponse = await getBlogById(app, createdBlogId);
     expect(getBlogByIdResponse).toEqual({ ...createdBlog });
   });

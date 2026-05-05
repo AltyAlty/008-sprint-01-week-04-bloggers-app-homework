@@ -209,8 +209,8 @@ Authorization: Basic <base64-encoded-credentials>
 3.1 Задать имя и пароль для пользователя БД.
 3.2 Нажать "Create Database User".
 3.4 Нажать "Choose a connection method".
-3.5 Выбрать "Drivers".
-3.6 В поле "Driver" выбрать "Node.js".
+3.5 Выбрать "Blogs".
+3.6 В поле "Blog" выбрать "Node.js".
 3.7 В поле "Version" выбрать "6.7 or later".
 3.8 Скопировать connection string: "mongodb+srv://username:password@cluster0.yi738es.mongodb.net/?appName=Cluster0".
 3.9 Нажать "Done".

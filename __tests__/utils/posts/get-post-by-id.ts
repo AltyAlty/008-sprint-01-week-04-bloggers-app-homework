@@ -11,11 +11,6 @@ export const getPostById = async (
   expectedStatus?: HttpStatus,
 ): Promise<PostOutputDTO> => {
   const testStatus = expectedStatus ?? HttpStatus.Ok_200;
-
-  const getPostResponse = await request(app)
-    .get(`${SETTINGS.POSTS_PATH}/${postId}`)
-    .set('Authorization', generateBasicAuthToken())
-    .expect(testStatus);
-
+  const getPostResponse = await request(app).get(`${SETTINGS.POSTS_PATH}/${postId}`).expect(testStatus);
   return getPostResponse.body;
 };
