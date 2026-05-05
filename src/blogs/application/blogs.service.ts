@@ -1,11 +1,10 @@
 import { blogsRepository } from '../repositories/blogs.repository';
 import { BlogType } from '../types/blog.type';
 import { ObjectId, WithId } from 'mongodb';
-import { postsRepository } from '../../posts/repositories/posts.repository';
-import { postsService } from '../../posts/application/posts.service';
 import { GetBlogsListQueryInputDTO } from '../routes/input-dto/get-blogs-list-query.input-dto';
 import { CreateBlogInputDTO } from '../routes/input-dto/create-blog.input-dto';
 import { UpdateBlogInputDTO } from '../routes/input-dto/update-blog.input-dto';
+import { postsService } from '../../posts/application/posts.service';
 
 /*Сервис "blogsService" для работы с данными по блогам.*/
 export const blogsService = {
@@ -45,16 +44,13 @@ export const blogsService = {
   async deleteById(blogId: string): Promise<void> {
     /*Просим репозиторий "blogsRepository" проверить по ID существует ли блог в БД.*/
     await blogsRepository.findById(blogId);
-    // await blogsService.findById(blogId);
     /*Если блог был найден, то просим сервис "postsService" узнать нет ли у этого блога постов.*/
     const posts = await postsService.findAllByBlogId(blogId);
-    // const posts = await postsRepository.findAllByBlogId(blogId);
 
     /*Если посты в блоге были найдены, то просим сервис "postsService" удалить их.*/
     if (posts) {
       const postsIds: ObjectId[] = posts.map((post) => post._id);
       await postsService.deleteManyByIds(postsIds);
-      // await postsRepository.deleteManyByIds(postsIds);
     }
 
     /*Просим репозиторий "blogsRepository" удалить блог в БД.*/
