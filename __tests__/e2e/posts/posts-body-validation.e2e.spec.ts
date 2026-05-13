@@ -237,7 +237,7 @@ describe('Posts API ID, body and auth validation checks', () => {
     const updatePostData: UpdatePostInputDTO = getUpdatePostInputDTO(createdBlogId);
 
     await request(app)
-      .put(`${SETTINGS.POSTS_PATH}/${createdBlogId}`)
+      .put(`${SETTINGS.POSTS_PATH}/${createdPostId}`)
       .send(updatePostData)
       .expect(HttpStatus.Unauthorized_401);
 
@@ -304,7 +304,7 @@ describe('Posts API ID, body and auth validation checks', () => {
     const createdPost: PostOutputDTO = await createPost(app, undefined, createdBlogId);
     const createdPostId: string = createdPost.id;
     const correctUpdatePostData: UpdatePostInputDTO = getUpdatePostInputDTO(createdBlogId);
-    const correctURL = `${SETTINGS.POSTS_PATH}/${createdBlogId}`;
+    const correctURL = `${SETTINGS.POSTS_PATH}/${createdPost}`;
 
     await request(app)
       .put(correctURL)
